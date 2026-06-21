@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Credit Card Customer Segmentation — Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,900&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{--ink:#10243E;--ink2:#1C3A5E;--paper:#F6F3EC;--card:#FFF;--signal:#E0533D;--teal:#2E7C84;--line:#D9D2C4;--muted:#5C6B7A}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+.wrap{max-width:780px;margin:0 auto;padding:0 24px}
+header{background:var(--ink);color:var(--paper);padding:60px 0 44px}
+.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:#F0A35E;margin-bottom:16px}
+h1{font-family:'Fraunces',serif;font-weight:900;font-size:clamp(30px,5vw,48px);line-height:1.05;letter-spacing:-.01em}
+.meta{margin-top:20px;font-family:'IBM Plex Mono',monospace;font-size:12.5px;color:#9FB0C2;display:flex;gap:18px;flex-wrap:wrap}
+.nav{margin-top:22px}.nav a{display:inline-block;color:#fff;background:var(--signal);text-decoration:none;font-size:13px;padding:8px 16px;border-radius:999px;font-weight:500}
+article{padding:48px 0 70px}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:27px;margin:42px 0 4px;letter-spacing:-.01em}
+.kicker{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--signal);text-transform:uppercase;letter-spacing:.14em}
+p{margin:14px 0;font-size:16px}
+.lead{font-size:18px;color:var(--ink2)}
+figure{margin:26px 0;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+figure img{width:100%;border-radius:8px;display:block}
+figcaption{font-size:13px;color:var(--muted);margin-top:10px;font-family:'IBM Plex Mono',monospace}
+table{width:100%;border-collapse:collapse;margin:22px 0;font-size:14px;background:var(--card);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+th,td{padding:10px 13px;text-align:left;border-bottom:1px solid var(--line)}
+th{background:var(--ink);color:#fff;font-weight:600;font-size:12.5px;letter-spacing:.03em}
+td.num,th.num{text-align:right;font-family:'IBM Plex Mono',monospace}
+tr:last-child td{border-bottom:none}
+.callout{background:var(--card);border-left:4px solid var(--signal);border-radius:0 12px 12px 0;padding:16px 20px;margin:24px 0}
+.callout strong{color:var(--signal)}
+ul{margin:14px 0 14px 22px}li{margin:7px 0}
+footer{border-top:1px solid var(--line);padding:26px 0 60px;color:var(--muted);font-size:13px}
+@media(max-width:600px){p,.lead{font-size:15px}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+  <div class="eyebrow">Personal project · Analytical report</div>
+  <h1>Decoding 8,950 cardholders: segments, the revolver paradox, and the tenure cliff</h1>
+  <div class="meta"><span>Tony Nguyen</span><span>Python · scikit-learn</span><span>K-Means + PCA</span></div>
+  <div class="nav"><a href="../dashboard/index.html">→ Open the interactive dashboard</a></div>
+</div></header>
+
+<article><div class="wrap">
+  <p class="lead">Banks earn most of their card profit from a minority of customers — and lose it when those customers quietly disengage. This project segments 8,950 anonymised cardholders by behaviour to answer three questions: who are the high-value customers, where is the churn risk, and what should the bank do about it?</p>
+
+  <span class="kicker">01 — Data &amp; preparation</span>
+  <h2>From 18 raw columns to a clean feature matrix</h2>
+  <p>The dataset records six months of behaviour across 18 fields — balances, purchases, cash advances, payment ratios and tenure. After dropping the customer ID, 314 missing values (in <span class="mono">MINIMUM_PAYMENTS</span> and <span class="mono">CREDIT_LIMIT</span>) were imputed with the median. Monetary fields are heavily right-skewed, so they were log-transformed before every feature was standardised with <span class="mono">StandardScaler</span> — without this, a handful of whales would dominate the distance metric and distort the clusters.</p>
+
+  <span class="kicker">02 — Method</span>
+  <h2>K-Means, with k chosen for action</h2>
+  <p>K-Means was run across k = 2–8 and scored with the silhouette coefficient. The score is modest and flat (≈0.21 at k=3) — expected for real behavioural data where customers blur into one another rather than forming neat balls. Rather than chase a marginally higher number, k = 3 was chosen because it maps onto three genuinely distinct, actionable personas. PCA (first two components ≈52% of variance) is used purely to visualise and sanity-check the separation.</p>
+  <figure><img src="../figures/silhouette_sweep.png" alt="Silhouette by k"><figcaption>Fig 1 — Silhouette score barely moves with k; the choice of three clusters is driven by business interpretability.</figcaption></figure>
+
+  <span class="kicker">03 — Findings</span>
+  <h2>Three personas, one paradox</h2>
+  <table>
+    <tr><th>Segment</th><th class="num">Share</th><th class="num">Avg balance</th><th class="num">Avg purchases</th><th class="num">Avg cash adv.</th><th class="num">% full pay</th></tr>
+    <tr><td>Power Transactors</td><td class="num">34.0%</td><td class="num">$2,019</td><td class="num">$2,373</td><td class="num">$701</td><td class="num">17%</td></tr>
+    <tr><td>Revolving Debtors</td><td class="num">34.2%</td><td class="num">$2,386</td><td class="num">$143</td><td class="num">$2,115</td><td class="num">3%</td></tr>
+    <tr><td>Marginal Spenders</td><td class="num">31.8%</td><td class="num">$196</td><td class="num">$463</td><td class="num">$55</td><td class="num">27%</td></tr>
+  </table>
+  <p><strong>Power Transactors</strong> are the revenue engine — they spend the most and use the card most often. <strong>Revolving Debtors</strong> carry the highest balances and lean on cash advances, yet make almost no new purchases and only 3% ever pay in full. <strong>Marginal Spenders</strong> are light, situational users.</p>
+  <div class="callout"><strong>The revolver paradox.</strong> The most valuable customers are also the most leveraged: high spend travels with high balances. That makes the top segment simultaneously the most profitable and the most interest-rate-sensitive — a group to grow carefully, not squeeze.</div>
+  <figure><img src="../figures/pca_segments.png" alt="PCA scatter of segments"><figcaption>Fig 2 — The three segments occupy distinct regions of PCA space, confirming the split is behaviourally real.</figcaption></figure>
+
+  <span class="kicker">04 — The retention lever</span>
+  <h2>The 12-month tenure cliff</h2>
+  <p>Tenure is overwhelmingly bunched at exactly 12 months — roughly 85% of customers — marking the anniversary point where renewal and disengagement decisions concentrate across every segment. This is the clearest, most actionable signal in the data: the moment to intervene is <em>before</em> month 12, not after.</p>
+
+  <span class="kicker">05 — Recommendations</span>
+  <h2>Three plays from three segments</h2>
+  <ul>
+    <li><strong>Protect the engine.</strong> Defend Power Transactors with premium rewards and a month-11 "Year 2" loyalty nudge that bridges the anniversary cliff.</li>
+    <li><strong>Convert balances safely.</strong> Offer Revolving Debtors balance-to-installment conversions to secure repayment and re-activate spend.</li>
+    <li><strong>Activate the habit.</strong> Nudge Marginal Spenders with category rewards (groceries, fuel) to turn occasional use into routine use.</li>
+  </ul>
+
+  <span class="kicker">06 — Limitations</span>
+  <h2>What this analysis can and can't say</h2>
+  <p>The silhouette score is modest, so the segments are useful generalisations rather than hard boundaries — many customers sit near the edges. The data is a six-month snapshot with no labels, so "churn risk" is inferred from behaviour, not observed outcomes. And K-Means assumes roughly spherical clusters, which real spending rarely forms. The findings are directional inputs for strategy, validated against business logic — not a predictive guarantee.</p>
+</div></article>
+
+<footer><div class="wrap">Credit Card Customer Segmentation · Tony Nguyen · reproducible via <span class="mono">python src/analysis.py</span>. Figures and metrics are generated directly from the cleaned dataset.</div></footer>
+</body>
+</html>
