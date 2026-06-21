@@ -1,0 +1,4 @@
+cluster,size,balance,purchases,cash_advance,credit_limit,payments,prc_full_payment,purchases_freq,tenure,share,segment
+0,2847,195.87,463.49,55.19,3274.6,684.96,0.27,0.53,11.33,31.8,Marginal Spenders
+1,3043,2018.75,2373.43,700.57,5820.56,2658.6,0.17,0.85,11.82,34.0,Power Transactors
+2,3060,2386.06,142.74,2115.02,4310.15,1788.05,0.03,0.09,11.39,34.2,Revolving Debtors
